@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button, InputGroup, FormControl, Glyphicon } from 'react-bootstrap';
 
 const IngredientInput = (props) => {
   const handleChange = (e) => {
@@ -11,21 +12,23 @@ const IngredientInput = (props) => {
   }
   
   return (
-    <div className="ingredient-input input-group">
-      <input className="ingredient form-control" 
+    <InputGroup>
+      <FormControl 
+      className="ingredient form-control" 
         required
         type="text" 
         value={ props.ingredient }
         onChange={ handleChange }
         />
-      <div className="input-group-addon">
-        <button 
-          className="awesome delete-ingredient"
-          onClick={ handleDelete } >
-          <i className="fa fa-minus-square" aria-hidden="true"></i>
-        </button>
-      </div>
-    </div>
+
+        <InputGroup.Button>
+          <Button 
+            
+            onClick={ handleDelete } >
+              <Glyphicon glyph="minus" />
+          </Button>
+        </InputGroup.Button>
+    </InputGroup>
   );
 }
 

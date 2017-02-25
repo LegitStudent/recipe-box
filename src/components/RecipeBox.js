@@ -1,7 +1,6 @@
 import React from 'react';
 import RecipeList from './RecipeList';
 import RecipeInput from './RecipeInput';
-import $ from 'jquery';
 
 /* 
   Recipes will be stored as state. Firstly, state stored in localStorage is retrieved at componentDidMount lifecycle. In order to sync localStorage with the app's current state, the state will be stored to localStorage.
@@ -12,7 +11,8 @@ class RecipeBox extends React.Component {
     super();
     this.state = {
       recipes: [],
-      recipeToUpdateIndex: -1
+      recipeToUpdateIndex: -1,
+      showInputModal: false
     }
     
     // Component Method Bindings
@@ -20,21 +20,27 @@ class RecipeBox extends React.Component {
     this.addRecipe = this.addRecipe.bind(this);
     this.updateRecipe = this.updateRecipe.bind(this);
     this.removeRecipe = this.removeRecipe.bind(this);
-    this.showAddRecipeModal = this.showAddRecipeModal.bind(this);
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.editRecipe = this.editRecipe.bind(this);
   }
   
-  // Component Lifecycle Methods
+  /*  Component Lifecycle Methods */
   
+  // Gets the recipes from localStorage and mounts to application.
   componentDidMount() {
     const parsedRecipes = JSON.parse(localStorage.getItem("_app_state"));
     
     this.setState({ recipes: parsedRecipes })
   }
   
+  // Updates localStorage to reflect current app state.
   componentDidUpdate() {
     localStorage.setItem("_app_state", JSON.stringify(this.state.recipes));
   }
   
+  /* CRUD Methods */
+
   // Retrieve recipe details by its index in the recipe array
   getRecipeByIndex(recipeIndex) {
     return this.state.recipes[recipeIndex];
@@ -52,7 +58,6 @@ class RecipeBox extends React.Component {
     });
     
     // Once this function is called, the queue for updating a recipe is cleared.
-    
     this.setState({
       recipes: newState,
       recipeToUpdateIndex: -1
@@ -67,41 +72,44 @@ class RecipeBox extends React.Component {
     
     this.setState({ recipes: newState });
   }
-  
-  queueRecipeUpdateIndex(index) {
-    this.setState({ recipeToUpdateIndex: index });
-    
+
+  /* View Methods */
+
+  openModal(updateIndex = -1) {
+    this.setState({
+      showInputModal: true,
+      recipeToUpdateIndex: updateIndex
+    });    
   }
-  
-  showAddRecipeModal(e) {
-    $('#recipe-modal').modal('show');
+
+  closeModal() {
+    this.setState({ 
+      showInputModal: false
+    });
   }
-  
-  showUpdateRecipeModal(e) {
-    $('#recipe-modal').modal('show');
+
+  editRecipe(index) {
+    this.openModal(index);
   }
-  
+
   render() {
     return (
       <div className="recipe-box">
         <h1 className="recipe-box__title">Recipe Box</h1>
         <RecipeList 
           recipes={ this.state.recipes }
-          removeRecipe={ this.removeRecipe } />
-        
-        { /* TODO: Add edit button for each recipe */ }
-        <button className="btn btn-default" onClick={ this.showAddRecipeModal }>
-          Add Recipe
-        </button>
-        
-        { /* Modals below: */ }
+          removeRecipe={ this.removeRecipe } 
+          editRecipe={ this.editRecipe }/>
         
         <RecipeInput
-          title={ this.props.recipe ? "New Recipe" : "Edit Recipe" }
           addRecipe={ this.addRecipe }
           getRecipe={ this.getRecipeByIndex }
+          editRecipe={ this.editRecipe }
+          recipeIndex={ this.state.recipeToUpdateIndex } 
           updateRecipe={ this.updateRecipe }
-          recipeIndex={ this.recipeToUpdateIndex } />        
+          show={ this.state.showInputModal }
+          open={ this.openModal }
+          close={ this.closeModal }/>        
       </div>
     );
   }

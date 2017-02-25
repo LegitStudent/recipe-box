@@ -1,4 +1,6 @@
 import React from 'react';
+import { Button, Glyphicon } from 'react-bootstrap';
+
 import IngredientsList from './IngredientsList';
 
 class Recipe extends React.Component {
@@ -11,33 +13,53 @@ class Recipe extends React.Component {
     
     this.toggleIngredientList = this.toggleIngredientList.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
   }
   
+  /* View Methdods */
+
   toggleIngredientList(e) {
-    e.preventDefault();
+    // e.preventDefault();
     this.setState({ collapsed: !this.state.collapsed })
   }
-  
+
+  /* Event-handlers */
+  handleEdit(e) {
+    this.props.editRecipe(this.props.index);
+  }
+
   handleDelete(e) {
     this.props.removeRecipe(this.props.index);
   }
   
+
   render() {
     return (
       <li className="recipe">
-        <a href="#" className="header"
-           onClick={ this.toggleIngredientList } >
-          <h2 className="name">{ this.props.name }</h2>
-        </a>
+        
+        <header className="header">
+          <h2 className="header__title name"
+              onClick={ this.toggleIngredientList }>
+              { this.props.name }
+          </h2>
+
+          {/*onClick=Edit recipe with recipe id */}
+          <Button
+            onClick={ this.handleEdit }>
+            <Glyphicon glyph="pencil" />
+          </Button>
+
+          <Button
+              bsStyle="danger"
+              onClick={ this.handleDelete }>
+            <Glyphicon glyph="trash" />
+          </Button>
+        </header>
+        
         
         <IngredientsList 
           ingredients={ this.props.ingredients }
           collapsed={ this.state.collapsed }/>
-        
-        <button className="awesome delete-recipe-button"
-          onClick={ this.handleDelete } >
-          <i className="fa fa-trash-o" aria-hidden="true"></i>
-        </button>
       </li>
       );
   }

@@ -11,7 +11,7 @@ const RecipeList = (props) => {
               name={ val.recipeName } 
               ingredients={ val.ingredients } 
               removeRecipe={ props.removeRecipe }
-              getRecipeByIndex={ props.getRecipeByIndex }
+              editRecipe={ props.editRecipe }
               />
           );
         }) }

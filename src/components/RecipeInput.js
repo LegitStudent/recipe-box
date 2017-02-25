@@ -1,27 +1,28 @@
 import React from 'react';
-import $ from 'jquery';
+import { Button, Modal, ControlLabel, FormGroup, FormControl } from 'react-bootstrap';
+
 import IngredientInput from './IngredientInput';
 
-/*  
-  General React Input Component
-    - Template for the NewRecipe and EditRecipe dialog boxes. The only difference between the two is the name. Functionality should be the same except for the submit button.
-*/
 
 class RecipeInput extends React.Component {
   constructor(props) {
     super(props); 
+
     // Stateful presentational component because new recipes change while being edited.
     this.state = {
       recipeName: "",
       recipeIngredients: [""]
     }
     
+    /* Show modal property should be in the props now as this.props.show */
+
     // Component event handler bindings
     this.addIngredient = this.addIngredient.bind(this);
     this.deleteIngredient = this.deleteIngredient.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChangeName = this.handleChangeName.bind(this);
     this.handleChangeIngredient = this.handleChangeIngredient.bind(this);
+    this.handleOpen = this.handleOpen.bind(this);
   }
   
   addIngredient(e) {
@@ -34,14 +35,24 @@ class RecipeInput extends React.Component {
   
   componentWillReceiveProps(nextProps) {
     // Check if recipeId changed
-    if (this.props.recipeIndex !== nextProps.recipeIndex) {
+    if (this.props !== nextProps) {
       const updateIndex = nextProps.recipeIndex;
-      const recipeDetails = this.props.getRecipe(updateIndex);
-      
-      this.setState({
-        recipeName: recipeDetails.name,
-        recipeIngredients: recipeDetails.ingredients
-      });
+
+      // Update Index is not -1 if an edit recipe operation was called. Otherwise, it will be a call for a new recipe.
+      if (updateIndex > -1) {
+        const recipeDetails = this.props.getRecipe(updateIndex);
+
+        this.setState({
+          recipeName: recipeDetails.recipeName,
+          recipeIngredients: recipeDetails.ingredients
+        });
+      }
+      else {
+        this.setState({
+          recipeName: "",
+          recipeIngredients: [""]
+        })
+      }
     }
   }
   
@@ -72,6 +83,10 @@ class RecipeInput extends React.Component {
   handleChangeName(e) {
     this.setState({ recipeName: e.target.value });
   }
+
+  handleOpen(e) {
+    this.props.open();
+  }
   
   handleSubmit(e) {
     e.preventDefault();
@@ -83,10 +98,15 @@ class RecipeInput extends React.Component {
     }
     
     // Use submit handler in the props
-    this.props.submitFunction(recipeToSubmit);
+    if (this.props.recipeIndex === -1) {
+      this.props.addRecipe(recipeToSubmit);
+    }
+    else {
+      this.props.updateRecipe(this.props.recipeIndex, recipeToSubmit);
+    }
     
     // Hide the modal
-    $("#recipe-modal").modal('hide');
+    this.props.close();
     
     // Reset component state to initial values
     this.setState({
@@ -97,27 +117,30 @@ class RecipeInput extends React.Component {
   
   render() {
     return (
-      <form id="recipe-modal" className="recipe-input modal fade" onSubmit={ this.handleSubmit }>
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="modal-title">{ this.props.recipe ? "New Recipe" : "Edit Recipe" }</h2>
-            </div>
-            
-            <div className="modal-body">
-              <div className="form-group">
-                <label className="name-field" htmlFor="recipe-name">Name: 
-                  <input required id="recipe-name"
-                    className="form-control"
+      <div>
+        <Button onClick={ this.handleOpen }>
+          Add Recipe
+        </Button>
+      
+        <Modal show={ this.props.show } onHide={ this.props.close }>
+          <form id="recipe-modal" className="recipe-input" onSubmit={ this.handleSubmit }>
+            <Modal.Header closeButton>
+              <Modal.Title>{ (this.props.recipeIndex >= 0) ? "Edit Recipe" : "New Recipe" }</Modal.Title>
+            </Modal.Header>
+                
+            <Modal.Body>
+              <FormGroup controlId="recipe-name">
+                <ControlLabel>Name: 
+                  <FormControl required id="recipe-name"
                     autoComplete="off"
                     value={ this.state.recipeName }
                     type="text" 
                     onChange={ this.handleChangeName } />
-                </label>
-              </div>
+                </ControlLabel>
+              </FormGroup>
               
-              <div className="form-group">
-                <label className="ingredients-field" htmlFor="recipe-ingredients">Ingredients:
+              <FormGroup controlId="recipe-ingredients">
+                <ControlLabel htmlFor="recipe-ingredients">Ingredients:
                   {
                     this.state.recipeIngredients.map((ingredient, i) => {
                       return (
@@ -131,29 +154,31 @@ class RecipeInput extends React.Component {
                       );
                     })
                   }
-                </label>
-              </div>
+                </ControlLabel>
+              </FormGroup>
               
-              <button
-                className="add-ingredient btn btn-default"
+              <Button
+                className="add-ingredient"
                 onClick={ this.addIngredient }>
                 Add Ingredient
-              </button>
-            </div>
-            
-            <div className="modal-footer">            
-              <input 
-                className="submit-recipe btn btn-primary" 
+              </Button>
+            </Modal.Body>
+                
+            <Modal.Footer>            
+              <Button 
+                bsStyle="primary"
+                className="submit-recipe" 
                 disabled={
                   this.state.recipeName === "" || 
                     this.state.recipeIngredients.join() === ""
                 }
-                type="submit" 
-                onClick={ this.handleSubmit }/>
-            </div>
-          </div>
-        </div>
-      </form>
+                type="submit" >
+                  Submit
+              </Button>
+            </Modal.Footer>
+          </form>
+        </Modal>
+      </div>
     );
   }
 }
