@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import RecipeBox from './components/RecipeBox';
-// import './index.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import './index.css';
 
 // If app is opened for the first time or if all keys are cleared, populate localStorage with initial values, otherwise the appState is always the localStorage
 
